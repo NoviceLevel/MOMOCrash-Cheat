@@ -1,4 +1,4 @@
-// pch.h: Precompiled header file
+#pragma once
 
 #define FRAMEWORK_VERSION 1.0.0
 #define FRAMEWORK_MAJOR_VERSION 1
@@ -32,7 +32,6 @@ static_assert(FRAMEWORK_TARGET_GAME != "", "Target game not set.");
 
 #define FRAMEWORK_RENDER_D3D11 1
 #define FRAMEWORK_RENDER_D3D12 0
-static_assert(FRAMEWORK_RENDER_D3D11 != FRAMEWORK_RENDER_D3D12, "Cannot use no or both rendering API(s)");
 
 #if FRAMEWORK_RENDER_D3D11
 #define KIERO_INCLUDE_D3D11  1

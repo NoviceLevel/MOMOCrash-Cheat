@@ -29,14 +29,7 @@ namespace GUI
 
 	inline void BeginRender()
 	{
-		#if FRAMEWORK_RENDER_D3D11
 		ImGui_ImplDX11_NewFrame();
-		#endif
-
-		#if FRAMEWORK_RENDER_D3D12
-		ImGui_ImplDX12_NewFrame();
-		#endif
-
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 	}

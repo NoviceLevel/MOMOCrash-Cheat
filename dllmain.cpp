@@ -1,12 +1,5 @@
 #include "pch.h"
-
-#if FRAMEWORK_RENDER_D3D11
 #include "Hooks/D3D11/D3D11Hooks.h"
-#endif
-
-#if FRAMEWORK_RENDER_D3D12
-#include "Hooks/D3D12/D3D12Hooks.h"
-#endif
 
 #define DO_THREAD_SLEEP 0
 #define THREAD_SLEEP_TIME 100
@@ -15,15 +8,19 @@ namespace Cheat
 {
 	bool Init()
 	{
-	#if FRAMEWORK_RENDER_D3D11
 		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
 		{
-			if (kiero::bind(8, reinterpret_cast<void**>(&oPresent), hkPresent) != kiero::Status::Success)
+			if (kiero::bind(8, reinterpret_cast<void**>(&D3D11Hook::oPresent), D3D11Hook::hkPresent) != kiero::Status::Success)
+			{
+				Utils::LogError(Utils::GetLocation(CurrentLoc), "Failed to bind D3D11 Present");
 				return false;
+			}
 		}
 		else
+		{
+			Utils::LogError(Utils::GetLocation(CurrentLoc), "Failed to initialize D3D11");
 			return false;
-	#endif
+		}
 
 	#if FRAMEWORK_UNREAL
 		if (!CG::InitSdk())
@@ -34,19 +31,6 @@ namespace Cheat
 
 		while (!(*CG::UWorld::GWorld))
 			continue;
-	#endif
-
-	#if FRAMEWORK_RENDER_D3D12
-		if (kiero::init(kiero::RenderType::D3D12) == kiero::Status::Success)
-		{
-			if (kiero::bind(54, (void**)&oExecuteCommandLists, hkExecuteCommandLists) != kiero::Status::Success)
-				return false;
-
-			if (kiero::bind(140, (void**)&oPresent, hkPresent) != kiero::Status::Success)
-				return false;
-		}
-		else
-			return false;
 	#endif
 
 		Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Initializing Globals");
@@ -125,11 +109,6 @@ namespace Cheat
 
 		console.get()->SetVisibility(true);
 		Utils::LogDebug(Utils::GetLocation(CurrentLoc), Cheat::Title + ": Unloading...");
-
-		#if FRAMEWORK_RENDER_D3D12
-		D3D12Release();
-		kiero::shutdown();
-		#endif
 
 		for (size_t i = 0; i < Features.size(); i++)
 		{
