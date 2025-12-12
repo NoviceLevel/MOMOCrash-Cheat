@@ -18,14 +18,18 @@
 
 inline bool checkStatus(std::string name, MH_STATUS status, std::string reason)
 {
-	if (status == MH_OK || status == MH_ERROR_ALREADY_CREATED || status == MH_ERROR_ALREADY_INITIALIZED)
+    if (status != MH_ERROR_ALREADY_CREATED && status != MH_ERROR_ALREADY_INITIALIZED)
+        return true;
+
+	if (status != MH_OK)
 	{
-		Utils::LogHook(Utils::GetLocation(CurrentLoc), name, reason, MH_StatusToString(status));
-		return true;
+		Utils::LogHook(Utils::GetLocation(CurrentLoc), name, "Error", MH_StatusToString(status));
+		return false;
 	}
-	
-	Utils::LogHook(Utils::GetLocation(CurrentLoc), name, "Error", MH_StatusToString(status));
-	return false;
+    else
+        Utils::LogHook(Utils::GetLocation(CurrentLoc), name, reason, MH_StatusToString(status));
+
+	return true;
 }
 
 /* Example:

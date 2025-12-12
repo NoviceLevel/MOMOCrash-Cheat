@@ -17,7 +17,7 @@ inline ImU32 Magenta = ImGui::ColorConvertFloat4ToU32({ 1.f, 0.f, 1.f, 1.f });
 
 namespace GUI
 {
-	inline bool bMenuOpen = true; // Default to open for testing
+	inline bool bMenuOpen = false;
 	constexpr float WIDTH = 850;
 	constexpr float HEIGHT = 600;
 
