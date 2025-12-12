@@ -132,11 +132,7 @@ public:
 
     virtual void DrawMenuItems()
     {
-        float colWidth = (GUI::WIDTH - 30) / 2.0f;
-        float rowHeight = (GUI::HEIGHT - 60) / 2.0f;
-
-        // Row 2 - first column
-        ImGui::BeginChild("##SaveManagement", ImVec2(colWidth, rowHeight), ImGuiChildFlags_Border);
+        ImGui::BeginChild("##SaveManagement", ImVec2(g_ColWidth, g_RowHeight), ImGuiChildFlags_Border);
         {
             ImGui::Text(U8("存档管理"));
             ImGui::Separator();

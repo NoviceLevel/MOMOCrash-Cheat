@@ -4,6 +4,9 @@
 bool bWatermark = true;
 bool bWatermarkFPS = true;
 
+float g_ColWidth = 0;
+float g_RowHeight = 0;
+
 void GUI::Render()
 {
 	if (bWatermark)
@@ -14,10 +17,11 @@ void GUI::Render()
 		ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT));
 		ImGui::Begin(Cheat::Title.c_str(), NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 
-		float columnWidth = ImGui::GetContentRegionAvail().x / 2.0f - 5.0f;
-		float rowHeight = ImGui::GetContentRegionAvail().y / 2.0f - 5.0f;
+		g_ColWidth = (ImGui::GetContentRegionAvail().x - 10.0f) / 2.0f;
+		g_RowHeight = (ImGui::GetContentRegionAvail().y - 10.0f) / 2.0f;
 
-		ImGui::BeginChild("##Cheat", ImVec2(columnWidth, rowHeight), ImGuiChildFlags_Border);
+		// Row 1 - Column 1: Settings
+		ImGui::BeginChild("##Cheat", ImVec2(g_ColWidth, g_RowHeight), ImGuiChildFlags_Border);
 		{
 			ImGui::Text(U8("作弊设置"));
 			ImGui::Separator();

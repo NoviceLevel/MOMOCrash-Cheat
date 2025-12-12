@@ -15,6 +15,9 @@ inline ImU32 Orange = ImGui::ColorConvertFloat4ToU32({ 1.f, 0.65f, 0.f, 1.f });
 inline ImU32 Purple = ImGui::ColorConvertFloat4ToU32({ 0.5f, 0.f, 0.5f, 1.f });
 inline ImU32 Magenta = ImGui::ColorConvertFloat4ToU32({ 1.f, 0.f, 1.f, 1.f });
 
+extern float g_ColWidth;
+extern float g_RowHeight;
+
 namespace GUI
 {
 	inline bool bMenuOpen = false;

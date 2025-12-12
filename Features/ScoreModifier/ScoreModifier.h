@@ -137,12 +137,8 @@ public:
     {
         if (!Initalized) return;
 
-        float colWidth = (GUI::WIDTH - 30) / 2.0f;
-        float rowHeight = (GUI::HEIGHT - 60) / 2.0f;
-
-        // Row 2 - second column (after SaveEditor)
         ImGui::SameLine();
-        ImGui::BeginChild("##ScoreInfo", ImVec2(colWidth, rowHeight), ImGuiChildFlags_Border);
+        ImGui::BeginChild("##ScoreInfo", ImVec2(g_ColWidth, g_RowHeight), ImGuiChildFlags_Border);
         {
             ImGui::Text(U8("游戏状态/修改"));
             ImGui::Separator();
