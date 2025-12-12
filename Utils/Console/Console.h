@@ -1,5 +1,3 @@
-// I made this forever ago. It's a simple console class that can be used to create a console window and hide it. It's useful for debugging and testing
-
 #pragma once
 #include <iostream>
 #include <format>

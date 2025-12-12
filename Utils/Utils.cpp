@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-// https://stackoverflow.com/questions/48708440/check-if-i-can-write-to-memory
-// https://stackoverflow.com/questions/18394647/can-i-check-if-memory-block-is-readable-without-raising-exception-with-c
 bool Utils::IsReadableMemory(void* lpAddress, size_t dwLength)
 {
 	MEMORY_BASIC_INFORMATION MemInfo;

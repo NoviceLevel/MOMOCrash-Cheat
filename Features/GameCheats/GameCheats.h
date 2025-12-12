@@ -1,12 +1,10 @@
 #pragma once
 #include "pch.h"
 
-// MOMOCrash Global Instance Pointers
 inline void* pSaveManagerInstance = nullptr;
 inline void* pGameLogicInstance = nullptr;
 inline void* pOnePlaySaveHolderInstance = nullptr;
 
-// Hook target addresses (global for macro compatibility)
 inline void* SaveManager_Save = nullptr;
 inline void* SaveManager_getCurrent = nullptr;
 inline void* GameLogic_Miss = nullptr;
@@ -14,37 +12,31 @@ inline void* GameLogic_Good = nullptr;
 inline void* GameLogic_Bad = nullptr;
 inline void* OnePlaySaveHolder_ctor = nullptr;
 
-// All Perfect mode flag
 inline bool bAllPerfectMode = false;
 
-// Hook: SaveManager.Save - Capture SaveManager Instance
 HOOK_DEF(void, SaveManager_Save, (void* __this))
 {
     pSaveManagerInstance = __this;
     return oSaveManager_Save(__this);
 }
 
-// Hook: SaveManager.get_Current - Capture SaveManager Instance
 HOOK_DEF(void*, SaveManager_getCurrent, (void* __this))
 {
     pSaveManagerInstance = __this;
     return oSaveManager_getCurrent(__this);
 }
 
-// Hook: GameLogic.Miss - Block Miss (No Miss feature)
 HOOK_DEF(void, GameLogic_Miss, (void* __this))
 {
     pGameLogicInstance = __this;
     return;
 }
 
-// Hook: GameLogic.Good - Convert to Perfect when All Perfect mode
 HOOK_DEF(void, GameLogic_Good, (void* __this))
 {
     pGameLogicInstance = __this;
     if (bAllPerfectMode)
     {
-        // Call Perfect instead of Good
         MonoMethod* Perfect = Mono::Instance().GetMethod("GameLogic", "Perfect", 0, "Assembly-CSharp", "MomottoCrash");
         if (Perfect != nullptr)
             Mono::Instance().Invoke(Perfect, __this, nullptr);
@@ -53,7 +45,6 @@ HOOK_DEF(void, GameLogic_Good, (void* __this))
     return oGameLogic_Good(__this);
 }
 
-// Hook: GameLogic.Bad - Convert to Perfect when All Perfect mode
 HOOK_DEF(void, GameLogic_Bad, (void* __this))
 {
     pGameLogicInstance = __this;
@@ -67,7 +58,6 @@ HOOK_DEF(void, GameLogic_Bad, (void* __this))
     return oGameLogic_Bad(__this);
 }
 
-// Hook: OnePlaySaveHolder.ctor - Capture OnePlaySaveHolder Instance
 HOOK_DEF(void, OnePlaySaveHolder_ctor, (void* __this))
 {
     pOnePlaySaveHolderInstance = __this;
@@ -81,7 +71,6 @@ private:
     bool bHooksInitialized = false;
     int iHookRetryCount = 0;
 
-    // Feature Toggles
     bool bAutoPlay = false;
     bool bAutoPlaySet = false;
     bool bNoMiss = false;
@@ -96,14 +85,11 @@ private:
     bool bSkipAffinityAnim = false;
     bool bSkipAffinityAnimSet = false;
 
-    // Values
     int iGaugeValue = 1000;
 
     void TryInitHooks()
     {
-        if (bHooksInitialized || iHookRetryCount > 100)
-            return;
-
+        if (bHooksInitialized || iHookRetryCount > 100) return;
         iHookRetryCount++;
 
         if (SaveManager_getCurrent == nullptr)
@@ -111,11 +97,9 @@ private:
             SaveManager_getCurrent = Mono::Instance().GetCompiledMethod("SaveManager", "get_Current", 0, "Assembly-CSharp", "MomottoCrash");
             if (SaveManager_getCurrent != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Info", "SaveManager.get_Current found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Info", "Found");
                 CreateHook(SaveManager_getCurrent);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Create", "Hook Created");
                 EnableHook(SaveManager_getCurrent);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Enable", "Hook Enabled");
             }
         }
 
@@ -124,11 +108,9 @@ private:
             SaveManager_Save = Mono::Instance().GetCompiledMethod("SaveManager", "Save", 0, "Assembly-CSharp", "MomottoCrash");
             if (SaveManager_Save != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Info", "SaveManager.Save found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Info", "Found");
                 CreateHook(SaveManager_Save);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Create", "Hook Created");
                 EnableHook(SaveManager_Save);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Enable", "Hook Enabled");
             }
         }
 
@@ -137,9 +119,8 @@ private:
             GameLogic_Miss = Mono::Instance().GetCompiledMethod("GameLogic", "Miss", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Miss != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Info", "GameLogic.Miss found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Info", "Found");
                 CreateHook(GameLogic_Miss);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Create", "Hook Created");
             }
         }
 
@@ -148,9 +129,8 @@ private:
             GameLogic_Good = Mono::Instance().GetCompiledMethod("GameLogic", "Good", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Good != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Info", "GameLogic.Good found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Info", "Found");
                 CreateHook(GameLogic_Good);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Create", "Hook Created");
             }
         }
 
@@ -159,9 +139,8 @@ private:
             GameLogic_Bad = Mono::Instance().GetCompiledMethod("GameLogic", "Bad", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Bad != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Info", "GameLogic.Bad found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Info", "Found");
                 CreateHook(GameLogic_Bad);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Create", "Hook Created");
             }
         }
 
@@ -170,11 +149,9 @@ private:
             OnePlaySaveHolder_ctor = Mono::Instance().GetCompiledMethod("OnePlaySaveHolder", ".ctor", 0, "Assembly-CSharp", "MomottoCrash");
             if (OnePlaySaveHolder_ctor != nullptr)
             {
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Info", "OnePlaySaveHolder.ctor found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Info", "Found");
                 CreateHook(OnePlaySaveHolder_ctor);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Create", "Hook Created");
                 EnableHook(OnePlaySaveHolder_ctor);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Enable", "Hook Enabled");
             }
         }
 
@@ -275,49 +252,17 @@ public:
     virtual void Run()
     {
         if (!Initalized) return;
+        if (!bHooksInitialized) TryInitHooks();
 
-        if (!bHooksInitialized)
-            TryInitHooks();
+        if (bAutoPlay && !bAutoPlaySet) { bAutoPlaySet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Enabled"); }
+        else if (!bAutoPlay && bAutoPlaySet) { bAutoPlaySet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Disabled"); }
 
-        // Auto Play toggle
-        if (bAutoPlay && !bAutoPlaySet)
-        {
-            bAutoPlaySet = true;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Enabled");
-        }
-        else if (!bAutoPlay && bAutoPlaySet)
-        {
-            bAutoPlaySet = false;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Disabled");
-        }
+        if (bNoMiss && !bNoMissHookSet && GameLogic_Miss != nullptr) { bNoMissHookSet = true; EnableHook(GameLogic_Miss); Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Enabled"); }
+        else if (!bNoMiss && bNoMissHookSet && GameLogic_Miss != nullptr) { bNoMissHookSet = false; DisableHook(GameLogic_Miss); Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Disabled"); }
 
-        // No Miss toggle
-        if (bNoMiss && !bNoMissHookSet && GameLogic_Miss != nullptr)
-        {
-            bNoMissHookSet = true;
-            EnableHook(GameLogic_Miss);
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Enabled");
-        }
-        else if (!bNoMiss && bNoMissHookSet && GameLogic_Miss != nullptr)
-        {
-            bNoMissHookSet = false;
-            DisableHook(GameLogic_Miss);
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Disabled");
-        }
+        if (bInfiniteGauge && !bInfiniteGaugeSet) { bInfiniteGaugeSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Enabled"); }
+        else if (!bInfiniteGauge && bInfiniteGaugeSet) { bInfiniteGaugeSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Disabled"); }
 
-        // Infinite Gauge toggle
-        if (bInfiniteGauge && !bInfiniteGaugeSet)
-        {
-            bInfiniteGaugeSet = true;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Enabled");
-        }
-        else if (!bInfiniteGauge && bInfiniteGaugeSet)
-        {
-            bInfiniteGaugeSet = false;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Disabled");
-        }
-
-        // All Perfect mode toggle
         if (bAllPerfectMode && !bAllPerfectHookSet)
         {
             bAllPerfectHookSet = true;
@@ -335,60 +280,28 @@ public:
             Utils::LogDebug(Utils::GetLocation(CurrentLoc), "All Perfect Disabled");
         }
 
-        // Force Full Combo toggle
-        if (bForceFullCombo && !bForceFullComboSet)
-        {
-            bForceFullComboSet = true;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Enabled");
-        }
-        else if (!bForceFullCombo && bForceFullComboSet)
-        {
-            bForceFullComboSet = false;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Disabled");
-        }
+        if (bForceFullCombo && !bForceFullComboSet) { bForceFullComboSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Enabled"); }
+        else if (!bForceFullCombo && bForceFullComboSet) { bForceFullComboSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Disabled"); }
 
-        // Skip Affinity Animation toggle
-        if (bSkipAffinityAnim && !bSkipAffinityAnimSet)
-        {
-            bSkipAffinityAnimSet = true;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Enabled");
-        }
-        else if (!bSkipAffinityAnim && bSkipAffinityAnimSet)
-        {
-            bSkipAffinityAnimSet = false;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Disabled");
-        }
+        if (bSkipAffinityAnim && !bSkipAffinityAnimSet) { bSkipAffinityAnimSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Enabled"); }
+        else if (!bSkipAffinityAnim && bSkipAffinityAnimSet) { bSkipAffinityAnimSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Disabled"); }
 
-        // Skip Result toggle
-        if (bSkipResult && !bSkipResultSet)
-        {
-            bSkipResultSet = true;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Enabled");
-        }
-        else if (!bSkipResult && bSkipResultSet)
-        {
-            bSkipResultSet = false;
-            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Disabled");
-        }
+        if (bSkipResult && !bSkipResultSet) { bSkipResultSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Enabled"); }
+        else if (!bSkipResult && bSkipResultSet) { bSkipResultSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Disabled"); }
 
-        // Force Full Combo - set clear type
         if (bForceFullCombo && pOnePlaySaveHolderInstance != nullptr)
         {
             int* pClearType = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestMusicClearType);
-            if (*pClearType < 3)
-                *pClearType = 3;
+            if (*pClearType < 3) *pClearType = 3;
         }
 
         if (pGameLogicInstance != nullptr)
         {
             if (pOnePlaySaveHolderInstance == nullptr)
-            {
                 pOnePlaySaveHolderInstance = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + 0x078);
-            }
 
             bool* pAuto = reinterpret_cast<bool*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::DebugAutoPlayMode);
-            if (*pAuto != bAutoPlay)
-                *pAuto = bAutoPlay;
+            if (*pAuto != bAutoPlay) *pAuto = bAutoPlay;
         }
 
         if (bInfiniteGauge && pGameLogicInstance != nullptr)
@@ -397,22 +310,19 @@ public:
             if (pGaugeRp != nullptr)
             {
                 int* pGaugeValue = reinterpret_cast<int*>((uintptr_t)pGaugeRp + 0x20);
-                if (*pGaugeValue < 1000)
-                    *pGaugeValue = 1000;
+                if (*pGaugeValue < 1000) *pGaugeValue = 1000;
             }
         }
 
         if (pOnePlaySaveHolderInstance != nullptr)
         {
             bool* pSkip = reinterpret_cast<bool*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::DebugForceResultSkip);
-            if (*pSkip != bSkipResult)
-                *pSkip = bSkipResult;
+            if (*pSkip != bSkipResult) *pSkip = bSkipResult;
 
             if (bSkipAffinityAnim)
             {
                 int* pAffinityPoint = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestAddCharacterAffinityPoint);
-                if (*pAffinityPoint > 0)
-                    *pAffinityPoint = 0;
+                if (*pAffinityPoint > 0) *pAffinityPoint = 0;
             }
         }
     }
