@@ -107,21 +107,21 @@ inline void ImportFonts()
 	fontConfig.MergeMode = false;
 	
 	// Try to load Microsoft YaHei first, fallback to SimHei
-	tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 16.0f, &fontConfig, io.Fonts->GetGlyphRangesChineseFull());
+	tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 14.0f, &fontConfig, io.Fonts->GetGlyphRangesChineseFull());
 	if (tahomaFont == nullptr)
 	{
-		tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\simhei.ttf", 16.0f, &fontConfig, io.Fonts->GetGlyphRangesChineseFull());
+		tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\simhei.ttf", 14.0f, &fontConfig, io.Fonts->GetGlyphRangesChineseFull());
 	}
 	if (tahomaFont == nullptr)
 	{
-		tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 14.0f);
+		tahomaFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 12.0f);
 	}
 
 	ImFontConfig Config;
 	Config.GlyphExtraSpacing.x = 1.f;
-	tahomaFontESP = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 16.0f, &Config, io.Fonts->GetGlyphRangesChineseFull());
+	tahomaFontESP = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msyh.ttc", 14.0f, &Config, io.Fonts->GetGlyphRangesChineseFull());
 	if (tahomaFontESP == nullptr)
 	{
-		tahomaFontESP = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 14.0f, &Config);
+		tahomaFontESP = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 12.0f, &Config);
 	}
 }
