@@ -2,6 +2,8 @@
 
 A cheat tool for the Steam version of MOMOCrash (MomottoCrash)
 
+Reference: [![Omega172](https://github.com/Omega172.png?size=20)](https://github.com/Omega172) [Omega172](https://github.com/Omega172)
+
 [中文说明](README_CN.md)
 
 ## Hotkeys

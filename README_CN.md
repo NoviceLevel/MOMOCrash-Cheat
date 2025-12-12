@@ -2,6 +2,8 @@
 
 Steam 版 MOMOCrash（MomottoCrash）的修改器
 
+参考来自: [![Omega172](https://github.com/Omega172.png?size=20)](https://github.com/Omega172) [Omega172](https://github.com/Omega172)
+
 [English](README.md)
 
 ## 快捷键
