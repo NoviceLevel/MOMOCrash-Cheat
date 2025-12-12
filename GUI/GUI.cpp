@@ -17,8 +17,6 @@ void GUI::Render()
 		float columnWidth = ImGui::GetContentRegionAvail().x / 2.0f - 5.0f;
 		float rowHeight = ImGui::GetContentRegionAvail().y / 2.0f - 5.0f;
 
-		// Row 1
-		// Column 1: Cheat Settings
 		ImGui::BeginChild("##Cheat", ImVec2(columnWidth, rowHeight), ImGuiChildFlags_Border);
 		{
 			ImGui::Text(U8("作弊设置"));
@@ -38,8 +36,6 @@ void GUI::Render()
 
 		ImGui::SameLine();
 
-		// Row 1: GameCheats (drawn by features)
-		// Row 2: SaveEditor, ScoreModifier (drawn by features)
 		for (size_t i = 0; i < Features.size(); i++)
 		{
 			Features[i].get()->DrawMenuItems();

@@ -31,23 +31,3 @@ inline bool checkStatus(std::string name, MH_STATUS status, std::string reason)
 
 	return true;
 }
-
-/* Example:
-inline void* pAlbumClassInstance = nullptr;
-void* Album_Update = nullptr;
-
-Album_Update = mono.GetCompiledMethod("Album", "Update", 0);
-if (Album_Update == nullptr)
-    return;
-
-CreateHook(Album_Update);
-EnableHook(Album_Update);
-
-HOOK_DEF(void, Album_Update, (void* __this))
-{
-    // Do stuff
-
-    pAlbumClassInstance = __this;
-    return oAlbum_Update(__this);
-}
-*/
