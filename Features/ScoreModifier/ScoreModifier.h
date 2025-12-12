@@ -25,6 +25,7 @@ private:
     int iGaugeGood = 5;
     int iGaugeBad = -10;
     bool bCustomGauge = false;
+    bool bCustomGaugeSet = false;
 
     // Score modifier
     int iSetScore = 999999;
@@ -94,7 +95,10 @@ private:
         if (pGameLogicInstance == nullptr) return;
         void* pScoreRp = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_scoreRp);
         if (pScoreRp != nullptr)
+        {
             *reinterpret_cast<int*>((uintptr_t)pScoreRp + 0x20) = score;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Score set to " + std::to_string(score));
+        }
     }
 
     void SetCombo(int combo)
@@ -102,7 +106,10 @@ private:
         if (pGameLogicInstance == nullptr) return;
         void* pComboRp = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_comboRp);
         if (pComboRp != nullptr)
+        {
             *reinterpret_cast<int*>((uintptr_t)pComboRp + 0x20) = combo;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Combo set to " + std::to_string(combo));
+        }
     }
 
     void ApplyGaugeValues()
@@ -111,6 +118,7 @@ private:
         *reinterpret_cast<int*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_gaugePerfectValue) = iGaugePerfect;
         *reinterpret_cast<int*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_gaugeGoodValue) = iGaugeGood;
         *reinterpret_cast<int*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_gaugeBadValue) = iGaugeBad;
+        Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Gauge values applied: P=" + std::to_string(iGaugePerfect) + " G=" + std::to_string(iGaugeGood) + " B=" + std::to_string(iGaugeBad));
     }
 
 public:
@@ -197,6 +205,18 @@ public:
     {
         if (!Initalized) return;
         ReadGameState();
+
+        // Custom Gauge toggle
+        if (bCustomGauge && !bCustomGaugeSet)
+        {
+            bCustomGaugeSet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Custom Gauge Enabled");
+        }
+        else if (!bCustomGauge && bCustomGaugeSet)
+        {
+            bCustomGaugeSet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Custom Gauge Disabled");
+        }
 
         // Keep custom gauge values applied
         if (bCustomGauge && pGameLogicInstance != nullptr)

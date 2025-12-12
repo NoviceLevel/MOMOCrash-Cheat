@@ -83,13 +83,18 @@ private:
 
     // Feature Toggles
     bool bAutoPlay = false;
+    bool bAutoPlaySet = false;
     bool bNoMiss = false;
     bool bNoMissHookSet = false;
     bool bInfiniteGauge = false;
+    bool bInfiniteGaugeSet = false;
     bool bSkipResult = false;
+    bool bSkipResultSet = false;
     bool bAllPerfectHookSet = false;
     bool bForceFullCombo = false;
+    bool bForceFullComboSet = false;
     bool bSkipAffinityAnim = false;
+    bool bSkipAffinityAnimSet = false;
 
     // Values
     int iGaugeValue = 1000;
@@ -274,37 +279,52 @@ public:
         if (!bHooksInitialized)
             TryInitHooks();
 
+        // Auto Play toggle
+        if (bAutoPlay && !bAutoPlaySet)
+        {
+            bAutoPlaySet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Enabled");
+        }
+        else if (!bAutoPlay && bAutoPlaySet)
+        {
+            bAutoPlaySet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Disabled");
+        }
+
+        // No Miss toggle
         if (bNoMiss && !bNoMissHookSet && GameLogic_Miss != nullptr)
         {
             bNoMissHookSet = true;
             EnableHook(GameLogic_Miss);
-            Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Enable", "Hook Enabled");
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Enabled");
         }
         else if (!bNoMiss && bNoMissHookSet && GameLogic_Miss != nullptr)
         {
             bNoMissHookSet = false;
             DisableHook(GameLogic_Miss);
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Disabled");
         }
 
-        // All Perfect mode - hook Good and Bad to convert to Perfect
+        // Infinite Gauge toggle
+        if (bInfiniteGauge && !bInfiniteGaugeSet)
+        {
+            bInfiniteGaugeSet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Enabled");
+        }
+        else if (!bInfiniteGauge && bInfiniteGaugeSet)
+        {
+            bInfiniteGaugeSet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Disabled");
+        }
+
+        // All Perfect mode toggle
         if (bAllPerfectMode && !bAllPerfectHookSet)
         {
             bAllPerfectHookSet = true;
-            if (GameLogic_Good != nullptr)
-            {
-                EnableHook(GameLogic_Good);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Enable", "Hook Enabled");
-            }
-            if (GameLogic_Bad != nullptr)
-            {
-                EnableHook(GameLogic_Bad);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Enable", "Hook Enabled");
-            }
-            if (GameLogic_Miss != nullptr)
-            {
-                EnableHook(GameLogic_Miss);
-                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Enable", "Hook Enabled");
-            }
+            if (GameLogic_Good != nullptr) EnableHook(GameLogic_Good);
+            if (GameLogic_Bad != nullptr) EnableHook(GameLogic_Bad);
+            if (GameLogic_Miss != nullptr) EnableHook(GameLogic_Miss);
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "All Perfect Enabled");
         }
         else if (!bAllPerfectMode && bAllPerfectHookSet)
         {
@@ -312,6 +332,43 @@ public:
             if (GameLogic_Good != nullptr) DisableHook(GameLogic_Good);
             if (GameLogic_Bad != nullptr) DisableHook(GameLogic_Bad);
             if (!bNoMiss && GameLogic_Miss != nullptr) DisableHook(GameLogic_Miss);
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "All Perfect Disabled");
+        }
+
+        // Force Full Combo toggle
+        if (bForceFullCombo && !bForceFullComboSet)
+        {
+            bForceFullComboSet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Enabled");
+        }
+        else if (!bForceFullCombo && bForceFullComboSet)
+        {
+            bForceFullComboSet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Force Full Combo Disabled");
+        }
+
+        // Skip Affinity Animation toggle
+        if (bSkipAffinityAnim && !bSkipAffinityAnimSet)
+        {
+            bSkipAffinityAnimSet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Enabled");
+        }
+        else if (!bSkipAffinityAnim && bSkipAffinityAnimSet)
+        {
+            bSkipAffinityAnimSet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Disabled");
+        }
+
+        // Skip Result toggle
+        if (bSkipResult && !bSkipResultSet)
+        {
+            bSkipResultSet = true;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Enabled");
+        }
+        else if (!bSkipResult && bSkipResultSet)
+        {
+            bSkipResultSet = false;
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Disabled");
         }
 
         // Force Full Combo - set clear type
