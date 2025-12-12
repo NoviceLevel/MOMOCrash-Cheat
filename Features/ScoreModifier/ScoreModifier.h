@@ -50,33 +50,34 @@ private:
 
         iMaxCombo = *reinterpret_cast<int*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_maxCombo);
 
-        // Read judgment statistics from ResultHolder (offset 0x080 in GameLogic)
-        void* pResultHolder = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + 0x080);
-        if (pResultHolder != nullptr)
+        // Read judgment statistics from GameLogicNotesHelper (offset 0x090 in GameLogic)
+        void* pNoteHelper = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + 0x090);
+        if (pNoteHelper != nullptr)
         {
-            // ResultHolder._resultDictionary is at offset 0x010
-            // We'll use GetResult method instead of direct dictionary access
-            MonoMethod* GetResult = Mono::Instance().GetMethod("ResultHolder", "GetResult", 1, "Assembly-CSharp", "MomottoCrash.Result");
-            if (GetResult != nullptr)
+            MonoMethod* getPerfect = Mono::Instance().GetMethod("GameLogicNotesHelper", "get_PerfectCount", 0, "Assembly-CSharp", "MomottoCrash");
+            MonoMethod* getGood = Mono::Instance().GetMethod("GameLogicNotesHelper", "get_GoodCount", 0, "Assembly-CSharp", "MomottoCrash");
+            MonoMethod* getBad = Mono::Instance().GetMethod("GameLogicNotesHelper", "get_BadCount", 0, "Assembly-CSharp", "MomottoCrash");
+            MonoMethod* getMiss = Mono::Instance().GetMethod("GameLogicNotesHelper", "get_MissCount", 0, "Assembly-CSharp", "MomottoCrash");
+            
+            if (getPerfect != nullptr)
             {
-                int resultType;
-                void* args[1] = { &resultType };
-                
-                resultType = 0; // Perfect
-                MonoObject* result = Mono::Instance().Invoke(GetResult, pResultHolder, args);
-                if (result != nullptr) iPerfectCount = *reinterpret_cast<int*>(result);
-                
-                resultType = 1; // Good
-                result = Mono::Instance().Invoke(GetResult, pResultHolder, args);
-                if (result != nullptr) iGoodCount = *reinterpret_cast<int*>(result);
-                
-                resultType = 2; // Bad
-                result = Mono::Instance().Invoke(GetResult, pResultHolder, args);
-                if (result != nullptr) iBadCount = *reinterpret_cast<int*>(result);
-                
-                resultType = 3; // Miss
-                result = Mono::Instance().Invoke(GetResult, pResultHolder, args);
-                if (result != nullptr) iMissCount = *reinterpret_cast<int*>(result);
+                MonoObject* result = Mono::Instance().Invoke(getPerfect, pNoteHelper, nullptr);
+                if (result != nullptr) iPerfectCount = *reinterpret_cast<int*>((uintptr_t)result + 0x10);
+            }
+            if (getGood != nullptr)
+            {
+                MonoObject* result = Mono::Instance().Invoke(getGood, pNoteHelper, nullptr);
+                if (result != nullptr) iGoodCount = *reinterpret_cast<int*>((uintptr_t)result + 0x10);
+            }
+            if (getBad != nullptr)
+            {
+                MonoObject* result = Mono::Instance().Invoke(getBad, pNoteHelper, nullptr);
+                if (result != nullptr) iBadCount = *reinterpret_cast<int*>((uintptr_t)result + 0x10);
+            }
+            if (getMiss != nullptr)
+            {
+                MonoObject* result = Mono::Instance().Invoke(getMiss, pNoteHelper, nullptr);
+                if (result != nullptr) iMissCount = *reinterpret_cast<int*>((uintptr_t)result + 0x10);
             }
         }
 
