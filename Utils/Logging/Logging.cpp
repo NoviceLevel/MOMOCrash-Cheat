@@ -17,10 +17,6 @@ void Utils::LogHook(Location stLocation, std::string sHookName, std::string sRea
 	std::cout << " -> Ln: " << colors::magenta << stLocation.m_iLine << colors::white << " Col: " << colors::magenta << stLocation.m_iColumn << colors::white;
 
 	std::cout << " | " << colors::yellow << sReason << colors::white << ": " << sMessage << std::endl;
-
-	// Write to file
-	std::string fileMsg = "Hook[" + sHookName + "]: " + stLocation.m_sFilename + " | " + stLocation.m_sFunction + " -> Ln: " + std::to_string(stLocation.m_iLine) + " | " + sReason + ": " + sMessage;
-	LogToFile(fileMsg);
 }
 
 void Utils::LogError(Location stLocation, int iErrorCode)
@@ -33,10 +29,6 @@ void Utils::LogError(Location stLocation, int iErrorCode)
 	std::cout << " -> Ln: " << colors::magenta << stLocation.m_iLine << colors::white << " Col: " << colors::magenta << stLocation.m_iColumn << colors::white;
 
 	std::cout << " | " << colors::yellow << "Info" << colors::white << ": " << std::system_category().message(iErrorCode) << std::endl;
-
-	// Write to file
-	std::string fileMsg = "Error: " + stLocation.m_sFilename + " | " + stLocation.m_sFunction + " -> Ln: " + std::to_string(stLocation.m_iLine) + " | Info: " + std::system_category().message(iErrorCode);
-	LogToFile(fileMsg);
 }
 
 void Utils::LogError(Location stLocation, std::string sErrorMessage)
@@ -49,10 +41,6 @@ void Utils::LogError(Location stLocation, std::string sErrorMessage)
 	std::cout << " -> Ln: " << colors::magenta << stLocation.m_iLine << colors::white << " Col: " << colors::magenta << stLocation.m_iColumn << colors::white;
 
 	std::cout << " | " << colors::yellow << "Info" << colors::white << ": " << sErrorMessage << std::endl;
-
-	// Write to file
-	std::string fileMsg = "Error: " + stLocation.m_sFilename + " | " + stLocation.m_sFunction + " -> Ln: " + std::to_string(stLocation.m_iLine) + " | Info: " + sErrorMessage;
-	LogToFile(fileMsg);
 }
 
 void Utils::LogDebug(Location stLocation, std::string sDebugMessage)
@@ -65,8 +53,4 @@ void Utils::LogDebug(Location stLocation, std::string sDebugMessage)
 	std::cout << " -> Ln: " << colors::magenta << stLocation.m_iLine << colors::white << " Col: " << colors::magenta << stLocation.m_iColumn << colors::white;
 
 	std::cout << " | " << colors::yellow << "Info" << colors::white << ": " << sDebugMessage << std::endl;
-
-	// Write to file
-	std::string fileMsg = "Debug: " + stLocation.m_sFilename + " | " + stLocation.m_sFunction + " -> Ln: " + std::to_string(stLocation.m_iLine) + " | Info: " + sDebugMessage;
-	LogToFile(fileMsg);
 }

@@ -11,9 +11,7 @@ public:
 
     virtual bool Setup()
     {
-        Utils::LogToFile("Quit::Setup() started");
         Initalized = true;
-        Utils::LogToFile("Quit::Setup() completed");
         return true;
     }
 

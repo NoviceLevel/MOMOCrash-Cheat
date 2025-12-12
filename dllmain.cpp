@@ -16,33 +16,14 @@ namespace Cheat
 {
 	bool Init()
 	{
-		// Initialize file logging first
-		Utils::InitFileLog();
-		Utils::LogToFile("=== Init() started ===");
-
 	#if FRAMEWORK_RENDER_D3D11
-		Utils::LogToFile("Initializing D3D11...");
-		kiero::Status::Enum kieroStatus = kiero::init(kiero::RenderType::D3D11);
-		Utils::LogToFile("kiero::init result: " + std::to_string(static_cast<int>(kieroStatus)));
-		
-		if (kieroStatus == kiero::Status::Success)
+		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
 		{
-			Utils::LogToFile("kiero::init succeeded, binding Present hook...");
-			kiero::Status::Enum bindStatus = kiero::bind(8, reinterpret_cast<void**>(&oPresent), hkPresent);
-			Utils::LogToFile("kiero::bind result: " + std::to_string(static_cast<int>(bindStatus)));
-			
-			if (bindStatus != kiero::Status::Success)
-			{
-				Utils::LogToFile("ERROR: kiero::bind failed!");
+			if (kiero::bind(8, reinterpret_cast<void**>(&oPresent), hkPresent) != kiero::Status::Success)
 				return false;
-			}
-			Utils::LogToFile("Present hook bound successfully");
 		}
 		else
-		{
-			Utils::LogToFile("ERROR: kiero::init failed!");
 			return false;
-		}
 	#endif
 
 	#if FRAMEWORK_UNREAL // If the framework is Unreal initalize the SDK assuming the SDK was generated with CheatGeat by Cormm
@@ -69,11 +50,11 @@ namespace Cheat
 			return false;
 	#endif
 
-		Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Initalizing Globals, this can take a bit"); // Log that the globals are being initalized
+		Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Initializing Globals, this can take a bit"); // Log that the globals are being initalized
 
 		MH_STATUS Status = MH_Initialize();
 		if (Status == MH_ERROR_ALREADY_INITIALIZED)
-			Utils::LogError(Utils::GetLocation(CurrentLoc), "MinHook already initalized");
+			Utils::LogError(Utils::GetLocation(CurrentLoc), "MinHook already initialized");
 
 	#if FRAMEWORK_UNREAL // If using the Unreal framework print the pointer to the Unreal class to make sure it was initalized
 		Utils::LogDebug(Utils::GetLocation(CurrentLoc), (std::stringstream() << "Unreal: 0x" << unreal.get()).str());
@@ -81,32 +62,19 @@ namespace Cheat
 
 		// Add other globals that need to be initalized here
 
-		Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Globals Initalized"); // Log that the globals have been initalized
+		Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Globals Initialized"); // Log that the globals have been initalized
 
 		// https://stackoverflow.com/questions/16711697/is-there-any-use-for-unique-ptr-with-array
-		// Features - GameCheats must be first to setup hooks that capture game instances
-		Utils::LogToFile("Creating Features...");
-		
-		Utils::LogToFile("Creating Quit...");
+		// Features
 		Features.push_back(std::make_unique<Quit>());
-		
-		Utils::LogToFile("Creating GameCheats (hooks for instance capture)...");
 		Features.push_back(std::make_unique<GameCheats>());
-		
-		Utils::LogToFile("Creating SaveEditor...");
 		Features.push_back(std::make_unique<SaveEditor>());
-		
-		Utils::LogToFile("Creating ScoreModifier...");
 		Features.push_back(std::make_unique<ScoreModifier>());
 
-		Utils::LogToFile("Setting up Features...");
 		for (size_t i = 0; i < Features.size(); i++) // A loop to grap the feature pointers and call their respective setup functions
 		{
-			Utils::LogToFile("Setting up Feature " + std::to_string(i) + "...");
 			Features[i].get()->Setup();
-			Utils::LogToFile("Feature " + std::to_string(i) + " setup complete");
 		}
-		Utils::LogToFile("All Features setup complete");
 
 		return true; // Return true if the initalization was successful
 	}
@@ -172,20 +140,15 @@ namespace Cheat
 		Utils::LogDebug(Utils::GetLocation(CurrentLoc), Cheat::Title + ": Unloading..."); // Log that the cheat is unloading
 
 		#if FRAMEWORK_RENDER_D3D12 // If the framework is using D3D12 unbind the hooks and shutdown kiero, we do this here because the game might crash if we do it in the D3D12Hooks.cpp file like we do with D3D11
-		// Destroy features first (disable their hooks before MH_Uninitialize)
-		for (size_t i = 0; i < Features.size(); i++)
-		{
-			Features[i].get()->Destroy();
-		}
 		D3D12Release();
 		kiero::shutdown();
 		#endif
 
-		// For D3D11, features are destroyed in hkPresent before kiero::shutdown
-		// Wait for D3D11 cleanup to complete
-		#if FRAMEWORK_RENDER_D3D11
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		#endif
+		// Destroy features
+		for (size_t i = 0; i < Features.size(); i++) // A loop to grab the feature pointers and call their respective destroy functions to clean up any resources that were used and restore any settings that were changed
+		{
+			Features[i].get()->Destroy();
+		}
 
 		console.get()->Destroy(); // Destroy/Free the console because if we don't the console window will stay open after the cheat is unloaded and can also cause a crash in rare cases
 

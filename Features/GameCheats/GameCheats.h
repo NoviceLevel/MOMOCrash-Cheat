@@ -21,7 +21,6 @@ inline bool bAllPerfectMode = false;
 HOOK_DEF(void, SaveManager_Save, (void* __this))
 {
     pSaveManagerInstance = __this;
-    Utils::LogDebug(Utils::GetLocation(CurrentLoc), "SaveManager instance captured via Save");
     return oSaveManager_Save(__this);
 }
 
@@ -72,7 +71,6 @@ HOOK_DEF(void, GameLogic_Bad, (void* __this))
 HOOK_DEF(void, OnePlaySaveHolder_ctor, (void* __this))
 {
     pOnePlaySaveHolderInstance = __this;
-    Utils::LogDebug(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder instance captured");
     return oOnePlaySaveHolder_ctor(__this);
 }
 
@@ -105,13 +103,14 @@ private:
 
         if (SaveManager_getCurrent == nullptr)
         {
-            // Hook get_Current - called frequently when accessing SaveData
             SaveManager_getCurrent = Mono::Instance().GetCompiledMethod("SaveManager", "get_Current", 0, "Assembly-CSharp", "MomottoCrash");
             if (SaveManager_getCurrent != nullptr)
             {
-                Utils::LogToFile("SaveManager.get_Current found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Info", "SaveManager.get_Current found");
                 CreateHook(SaveManager_getCurrent);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Create", "Hook Created");
                 EnableHook(SaveManager_getCurrent);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_getCurrent", "Enable", "Hook Enabled");
             }
         }
 
@@ -120,9 +119,11 @@ private:
             SaveManager_Save = Mono::Instance().GetCompiledMethod("SaveManager", "Save", 0, "Assembly-CSharp", "MomottoCrash");
             if (SaveManager_Save != nullptr)
             {
-                Utils::LogToFile("SaveManager.Save found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Info", "SaveManager.Save found");
                 CreateHook(SaveManager_Save);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Create", "Hook Created");
                 EnableHook(SaveManager_Save);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "SaveManager_Save", "Enable", "Hook Enabled");
             }
         }
 
@@ -131,8 +132,9 @@ private:
             GameLogic_Miss = Mono::Instance().GetCompiledMethod("GameLogic", "Miss", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Miss != nullptr)
             {
-                Utils::LogToFile("GameLogic.Miss found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Info", "GameLogic.Miss found");
                 CreateHook(GameLogic_Miss);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Create", "Hook Created");
             }
         }
 
@@ -141,8 +143,9 @@ private:
             GameLogic_Good = Mono::Instance().GetCompiledMethod("GameLogic", "Good", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Good != nullptr)
             {
-                Utils::LogToFile("GameLogic.Good found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Info", "GameLogic.Good found");
                 CreateHook(GameLogic_Good);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Create", "Hook Created");
             }
         }
 
@@ -151,8 +154,9 @@ private:
             GameLogic_Bad = Mono::Instance().GetCompiledMethod("GameLogic", "Bad", 0, "Assembly-CSharp", "MomottoCrash");
             if (GameLogic_Bad != nullptr)
             {
-                Utils::LogToFile("GameLogic.Bad found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Info", "GameLogic.Bad found");
                 CreateHook(GameLogic_Bad);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Create", "Hook Created");
             }
         }
 
@@ -161,16 +165,18 @@ private:
             OnePlaySaveHolder_ctor = Mono::Instance().GetCompiledMethod("OnePlaySaveHolder", ".ctor", 0, "Assembly-CSharp", "MomottoCrash");
             if (OnePlaySaveHolder_ctor != nullptr)
             {
-                Utils::LogToFile("OnePlaySaveHolder.ctor found");
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Info", "OnePlaySaveHolder.ctor found");
                 CreateHook(OnePlaySaveHolder_ctor);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Create", "Hook Created");
                 EnableHook(OnePlaySaveHolder_ctor);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "OnePlaySaveHolder_ctor", "Enable", "Hook Enabled");
             }
         }
 
         if (SaveManager_getCurrent != nullptr && GameLogic_Miss != nullptr)
         {
             bHooksInitialized = true;
-            Utils::LogToFile("All hooks initialized");
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "All hooks initialized");
         }
     }
 
@@ -179,7 +185,6 @@ public:
 
     virtual bool Setup()
     {
-        Utils::LogToFile("GameCheats::Setup()");
         TryInitHooks();
         Initalized = true;
         return true;
@@ -258,7 +263,6 @@ public:
                 pOnePlaySaveHolderInstance ? "OK" : "--");
         }
         ImGui::EndChild();
-        // Row 1 ends here, no SameLine - next feature starts Row 2
     }
 
     virtual void Render() {}
@@ -270,12 +274,11 @@ public:
         if (!bHooksInitialized)
             TryInitHooks();
 
-
-
         if (bNoMiss && !bNoMissHookSet && GameLogic_Miss != nullptr)
         {
             bNoMissHookSet = true;
             EnableHook(GameLogic_Miss);
+            Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Enable", "Hook Enabled");
         }
         else if (!bNoMiss && bNoMissHookSet && GameLogic_Miss != nullptr)
         {
@@ -287,9 +290,21 @@ public:
         if (bAllPerfectMode && !bAllPerfectHookSet)
         {
             bAllPerfectHookSet = true;
-            if (GameLogic_Good != nullptr) EnableHook(GameLogic_Good);
-            if (GameLogic_Bad != nullptr) EnableHook(GameLogic_Bad);
-            if (GameLogic_Miss != nullptr) EnableHook(GameLogic_Miss); // Also block Miss
+            if (GameLogic_Good != nullptr)
+            {
+                EnableHook(GameLogic_Good);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Good", "Enable", "Hook Enabled");
+            }
+            if (GameLogic_Bad != nullptr)
+            {
+                EnableHook(GameLogic_Bad);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Bad", "Enable", "Hook Enabled");
+            }
+            if (GameLogic_Miss != nullptr)
+            {
+                EnableHook(GameLogic_Miss);
+                Utils::LogHook(Utils::GetLocation(CurrentLoc), "GameLogic_Miss", "Enable", "Hook Enabled");
+            }
         }
         else if (!bAllPerfectMode && bAllPerfectHookSet)
         {
@@ -303,18 +318,15 @@ public:
         if (bForceFullCombo && pOnePlaySaveHolderInstance != nullptr)
         {
             int* pClearType = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestMusicClearType);
-            if (*pClearType < 3) // Less than FullCombo
-                *pClearType = 3; // FullCombo
+            if (*pClearType < 3)
+                *pClearType = 3;
         }
 
         if (pGameLogicInstance != nullptr)
         {
-            // Get OnePlaySaveHolder from GameLogic if not captured yet
             if (pOnePlaySaveHolderInstance == nullptr)
             {
-                pOnePlaySaveHolderInstance = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + 0x078); // _onePlayHolder
-                if (pOnePlaySaveHolderInstance != nullptr)
-                    Utils::LogToFile("OnePlaySaveHolder obtained from GameLogic");
+                pOnePlaySaveHolderInstance = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + 0x078);
             }
 
             bool* pAuto = reinterpret_cast<bool*>((uintptr_t)pGameLogicInstance + GameLogicOffsets::DebugAutoPlayMode);
@@ -324,11 +336,9 @@ public:
 
         if (bInfiniteGauge && pGameLogicInstance != nullptr)
         {
-            // Direct memory write to _gaugeRp value instead of calling SetGauge
             void* pGaugeRp = *reinterpret_cast<void**>((uintptr_t)pGameLogicInstance + GameLogicOffsets::_gaugeRp);
             if (pGaugeRp != nullptr)
             {
-                // ReactiveProperty<int> value is at offset 0x20
                 int* pGaugeValue = reinterpret_cast<int*>((uintptr_t)pGaugeRp + 0x20);
                 if (*pGaugeValue < 1000)
                     *pGaugeValue = 1000;
@@ -341,7 +351,6 @@ public:
             if (*pSkip != bSkipResult)
                 *pSkip = bSkipResult;
 
-            // Skip affinity animation - set LatestAddCharacterAffinityPoint to 0
             if (bSkipAffinityAnim)
             {
                 int* pAffinityPoint = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestAddCharacterAffinityPoint);

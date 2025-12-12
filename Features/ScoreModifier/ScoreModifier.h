@@ -118,7 +118,6 @@ public:
 
     virtual bool Setup()
     {
-        Utils::LogToFile("ScoreModifier::Setup()");
         Initalized = true;
         return true;
     }

@@ -36,8 +36,6 @@ bool hkInit = false;
 // Function to initialize ImGui
 void InitImGui()
 {
-	Utils::LogToFile("InitImGui() started");
-	
 	// Create ImGui context
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -50,8 +48,6 @@ void InitImGui()
 	// Setup ImGui style and import fonts
 	SetupStyle();
 	ImportFonts();
-	
-	Utils::LogToFile("InitImGui() completed");
 }
 
 // Custom window procedure to handle Win32 window messages
@@ -92,19 +88,15 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	// Check if initialization has been performed
 	if (!hkInit)
 	{
-		Utils::LogToFile("hkPresent: First call, initializing...");
-		
 		// Get the device and context from the swap chain
 		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&pDevice)))
 		{
-			Utils::LogToFile("hkPresent: Got D3D11 device");
 			pDevice->GetImmediateContext(&pContext);
 
 			// Get the window handle and create the render target view
 			DXGI_SWAP_CHAIN_DESC sd;
 			pSwapChain->GetDesc(&sd);
 			window = sd.OutputWindow;
-			Utils::LogToFile("hkPresent: Got window handle");
 			
 			ID3D11Texture2D* pBackBuffer;
 			pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
@@ -112,7 +104,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			{
 				pDevice->CreateRenderTargetView(pBackBuffer, NULL, &mainRenderTargetView);
 				pBackBuffer->Release();
-				Utils::LogToFile("hkPresent: Created render target view");
 			}
 
 			// Hook the window procedure and initialize ImGui
@@ -121,14 +112,10 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 			// Set initialization flag and call the original Present function
 			hkInit = true;
-			Utils::LogToFile("hkPresent: Initialization complete");
 			return oPresent(pSwapChain, SyncInterval, Flags);
 		}
 		else
-		{
-			Utils::LogToFile("hkPresent: Failed to get D3D11 device");
 			return oPresent(pSwapChain, SyncInterval, Flags);
-		}
 	}
 
 	// Begin rendering ImGui
@@ -149,14 +136,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	// Check if the cheat should stop running
 	if (!Cheat::bShouldRun)
 	{
-		Utils::LogToFile("hkPresent: Unloading, cleaning up...");
-		
 		// Destroy features first (disable their hooks before MH_Uninitialize)
 		for (size_t i = 0; i < Features.size(); i++)
 		{
 			Features[i].get()->Destroy();
 		}
-		Utils::LogToFile("hkPresent: Features destroyed");
 		
 		// Shutdown ImGui
 		ImGui_ImplDX11_Shutdown();
@@ -189,7 +173,6 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		// Shutdown kiero (calls MH_Uninitialize)
 		kiero::shutdown();
 		
-		Utils::LogToFile("hkPresent: Cleanup complete");
 		hkInit = false;
 		return oPresent(pSwapChain, SyncInterval, Flags);
 	}

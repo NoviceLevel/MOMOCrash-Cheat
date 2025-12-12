@@ -3,47 +3,9 @@
 
 #include <source_location>
 #include <filesystem>
-#include <fstream>
-#include <mutex>
 
 namespace Utils
 {
-	// File logger for debugging crashes
-	inline std::ofstream g_LogFile;
-	inline std::mutex g_LogMutex;
-	inline bool g_LogFileInitialized = false;
-
-	inline void InitFileLog()
-	{
-		if (!g_LogFileInitialized)
-		{
-			g_LogFile.open("MOMOCrash_log.txt", std::ios::out | std::ios::trunc);
-			g_LogFileInitialized = true;
-			if (g_LogFile.is_open())
-				g_LogFile << "=== MOMOCrash Log Started ===" << std::endl;
-		}
-	}
-
-	inline void LogToFile(const std::string& message)
-	{
-		std::lock_guard<std::mutex> lock(g_LogMutex);
-		if (!g_LogFileInitialized)
-			InitFileLog();
-		if (g_LogFile.is_open())
-		{
-			g_LogFile << message << std::endl;
-			g_LogFile.flush();
-		}
-	}
-
-	inline void CloseFileLog()
-	{
-		if (g_LogFile.is_open())
-		{
-			g_LogFile << "=== MOMOCrash Log Ended ===" << std::endl;
-			g_LogFile.close();
-		}
-	}
 	struct Location // A struct to hold the location of the error used in the logging function for pretty printing
 	{
 		std::string m_sFilename;

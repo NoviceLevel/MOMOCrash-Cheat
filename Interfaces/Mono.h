@@ -33,7 +33,6 @@ typedef uint32_t (*t_mono_field_get_offset)(MonoClassField* field);
 
 // Additional functions for finding loaded assemblies
 typedef MonoImage* (*t_mono_image_loaded)(const char* name);
-typedef void (*t_mono_assembly_foreach)(void (*func)(MonoAssembly* assembly, void* user_data), void* user_data);
 
 class Mono
 {
@@ -59,34 +58,20 @@ private:
 	t_mono_vtable_get_static_field_data mono_vtable_get_static_field_data = nullptr;
 	t_mono_field_get_offset mono_field_get_offset = nullptr;
 	t_mono_image_loaded mono_image_loaded = nullptr;
-	t_mono_assembly_foreach mono_assembly_foreach = nullptr;
 	
 	// Cached assembly image
 	MonoImage* pCachedAssemblyCSharp = nullptr;
 
 	void Initalize()
 	{
-		Utils::LogToFile("Mono::Initalize() started");
-		
 		// Try different mono dll names
 		hMono = GetModuleHandleA("mono-2.0-bdwgc.dll");
-		if (hMono != NULL) Utils::LogToFile("Found mono-2.0-bdwgc.dll");
 		if (hMono == NULL)
-		{
 			hMono = GetModuleHandleA("mono.dll");
-			if (hMono != NULL) Utils::LogToFile("Found mono.dll");
-		}
 		if (hMono == NULL)
-		{
 			hMono = GetModuleHandleA("mono-2.0.dll");
-			if (hMono != NULL) Utils::LogToFile("Found mono-2.0.dll");
-		}
 		if (hMono == NULL)
-		{
-			Utils::LogToFile("ERROR: Mono DLL not found!");
-			MessageBoxA(NULL, "Mono DLL not found!", "MOMOCrash Error", MB_OK);
 			return;
-		}
 
 		// Necessary functions to get method addresses
 		mono_domain_assembly_open = reinterpret_cast<t_mono_domain_assembly_open>(GetProcAddress(hMono, "mono_domain_assembly_open"));
@@ -104,57 +89,15 @@ private:
 		mono_vtable_get_static_field_data = reinterpret_cast<t_mono_vtable_get_static_field_data>(GetProcAddress(hMono, "mono_vtable_get_static_field_data"));
 		mono_field_get_offset = reinterpret_cast<t_mono_field_get_offset>(GetProcAddress(hMono, "mono_field_get_offset"));
 		mono_image_loaded = reinterpret_cast<t_mono_image_loaded>(GetProcAddress(hMono, "mono_image_loaded"));
-		mono_assembly_foreach = reinterpret_cast<t_mono_assembly_foreach>(GetProcAddress(hMono, "mono_assembly_foreach"));
 		
 		// Attach thread to prevent crashes
 		mono_thread_attach = reinterpret_cast<t_mono_thread_attach>(GetProcAddress(hMono, "mono_thread_attach"));
 		mono_get_root_domain = reinterpret_cast<t_mono_get_root_domain>(GetProcAddress(hMono, "mono_get_root_domain"));
 		
-		if (mono_thread_attach == nullptr || mono_get_root_domain == nullptr)
-		{
-			Utils::LogToFile("ERROR: Failed to get mono_thread_attach or mono_get_root_domain!");
-			MessageBoxA(NULL, "Failed to get mono functions!", "MOMOCrash Error", MB_OK);
-			return;
-		}
-
-		Utils::LogToFile("Getting root domain...");
-		MonoDomain* domain = mono_get_root_domain();
-		if (domain != nullptr)
-		{
-			Utils::LogToFile("Attaching thread to domain...");
-			mono_thread_attach(domain);
-		}
-		else
-		{
-			Utils::LogToFile("WARNING: Root domain is null!");
-		}
-
-		// Try to pre-cache Assembly-CSharp
-		Utils::LogToFile("Trying to find Assembly-CSharp...");
-		
-		// Try mono_image_loaded with different names
-		if (mono_image_loaded != nullptr)
-		{
-			const char* names[] = { "Assembly-CSharp", "Assembly-CSharp.dll", "assembly-csharp" };
-			for (const char* name : names)
-			{
-				MonoImage* img = mono_image_loaded(name);
-				if (img != nullptr)
-				{
-					Utils::LogToFile(std::string("  Found Assembly-CSharp via: ") + name);
-					pCachedAssemblyCSharp = img;
-					break;
-				}
-			}
-		}
-
-		if (pCachedAssemblyCSharp == nullptr)
-		{
-			Utils::LogToFile("  Assembly-CSharp not found in cache, will try on first use");
-		}
+		if (mono_thread_attach != nullptr && mono_get_root_domain != nullptr)
+			mono_thread_attach(mono_get_root_domain());
 
 		this->initalized = true;
-		Utils::LogToFile("Mono::Initalize() completed successfully");
 	}
 
 public:
@@ -187,7 +130,6 @@ public:
 			pImage = mono_image_loaded(assemblyName);
 			if (pImage != nullptr)
 			{
-				Utils::LogToFile(std::string("  Found via mono_image_loaded: ") + assemblyName);
 				if (strcmp(assemblyName, "Assembly-CSharp") == 0)
 					pCachedAssemblyCSharp = pImage;
 				return pImage;
@@ -202,7 +144,6 @@ public:
 			pImage = mono_assembly_get_image(pAssembly);
 			if (pImage != nullptr)
 			{
-				Utils::LogToFile(std::string("  Found via .dll: ") + dllName);
 				if (strcmp(assemblyName, "Assembly-CSharp") == 0)
 					pCachedAssemblyCSharp = pImage;
 				return pImage;
@@ -217,7 +158,6 @@ public:
 			pImage = mono_assembly_get_image(pAssembly);
 			if (pImage != nullptr)
 			{
-				Utils::LogToFile(std::string("  Found via managed path: ") + managedPath);
 				if (strcmp(assemblyName, "Assembly-CSharp") == 0)
 					pCachedAssemblyCSharp = pImage;
 				return pImage;
@@ -231,45 +171,30 @@ public:
 			pImage = mono_assembly_get_image(pAssembly);
 			if (pImage != nullptr)
 			{
-				Utils::LogToFile(std::string("  Found via name: ") + assemblyName);
 				if (strcmp(assemblyName, "Assembly-CSharp") == 0)
 					pCachedAssemblyCSharp = pImage;
 				return pImage;
 			}
 		}
 
-		Utils::LogToFile(std::string("  Failed to find assembly: ") + assemblyName);
 		return nullptr;
 	}
 
 	void* GetCompiledMethod(const char* className, const char* methodName, int param_count = 0, const char* assemblyName = "Assembly-CSharp", const char* nameSpace = "MomottoCrash")
 	{
-		Utils::LogToFile(std::string("GetCompiledMethod: ") + nameSpace + "." + className + "." + methodName);
-		
 		mono_thread_attach(mono_get_root_domain());
 
 		MonoImage* pImage = GetImage(assemblyName);
 		if (pImage == nullptr)
-		{
-			Utils::LogToFile(std::string("  ERROR: Assembly not found: ") + assemblyName);
 			return nullptr;
-		}
 
 		MonoClass* pKlass = mono_class_from_name(pImage, nameSpace, className);
 		if (pKlass == nullptr)
-		{
-			Utils::LogToFile(std::string("  ERROR: Class not found: ") + nameSpace + "." + className);
 			return nullptr;
-		}
 
 		MonoMethod* pMethod = mono_class_get_method_from_name(pKlass, methodName, param_count);
 		if (pMethod == nullptr)
-		{
-			Utils::LogToFile(std::string("  ERROR: Method not found: ") + methodName);
 			return nullptr;
-		}
-		
-		Utils::LogToFile("  SUCCESS: Method found");
 
 		return mono_compile_method(pMethod);
 	}
@@ -316,8 +241,7 @@ public:
 	
 	MonoClassField* GetField(MonoClass* pKlass, const char* fieldName)
 	{
-		MonoClassField* pField = mono_class_get_field_from_name(pKlass, fieldName);
-		return pField;
+		return mono_class_get_field_from_name(pKlass, fieldName);
 	}
 
 	uint32_t GetFieldOffset(MonoClassField* field)
@@ -367,9 +291,7 @@ public:
 		uintptr_t addr = reinterpret_cast<uintptr_t>(GetStaticFieldData(pKlass));
 		uint32_t offset = GetFieldOffset(pField);
 
-		void* value = reinterpret_cast<void*>(addr + offset);
-		
-		return value;
+		return reinterpret_cast<void*>(addr + offset);
 	}
 
 	MonoObject* Invoke(MonoMethod* method, void* obj, void** params)
