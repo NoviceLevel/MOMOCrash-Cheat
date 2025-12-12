@@ -73,12 +73,9 @@ private:
 
     bool bAutoPlay = false;
     bool bAutoPlaySet = false;
-    bool bNoMiss = false;
-    bool bNoMissHookSet = false;
     bool bInfiniteGauge = false;
     bool bInfiniteGaugeSet = false;
-    bool bSkipResult = false;
-    bool bSkipResultSet = false;
+
     bool bAllPerfectHookSet = false;
     bool bForceFullCombo = false;
     bool bForceFullComboSet = false;
@@ -203,20 +200,10 @@ public:
                 }
             }
 
-            ImGui::Checkbox(U8("无Miss"), &bNoMiss);
             ImGui::Checkbox(U8("无限血条"), &bInfiniteGauge);
             ImGui::Checkbox(U8("全Perfect"), &bAllPerfectMode);
             ImGui::Checkbox(U8("强制全连"), &bForceFullCombo);
-            ImGui::Checkbox(U8("跳过升级动画"), &bSkipAffinityAnim);
-            
-            if (ImGui::Checkbox(U8("跳过结算"), &bSkipResult))
-            {
-                if (pOnePlaySaveHolderInstance != nullptr)
-                {
-                    bool* pSkip = reinterpret_cast<bool*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::DebugForceResultSkip);
-                    *pSkip = bSkipResult;
-                }
-            }
+            ImGui::Checkbox(U8("跳过好感度动画"), &bSkipAffinityAnim);
 
             ImGui::Separator();
             ImGui::Text(U8("血条值:"));
@@ -251,11 +238,18 @@ public:
         if (!Initalized) return;
         if (!bHooksInitialized) TryInitHooks();
 
-        if (bAutoPlay && !bAutoPlaySet) { bAutoPlaySet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Enabled"); }
-        else if (!bAutoPlay && bAutoPlaySet) { bAutoPlaySet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Disabled"); }
-
-        if (bNoMiss && !bNoMissHookSet && GameLogic_Miss != nullptr) { bNoMissHookSet = true; EnableHook(GameLogic_Miss); Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Enabled"); }
-        else if (!bNoMiss && bNoMissHookSet && GameLogic_Miss != nullptr) { bNoMissHookSet = false; DisableHook(GameLogic_Miss); Utils::LogDebug(Utils::GetLocation(CurrentLoc), "No Miss Disabled"); }
+        if (bAutoPlay && !bAutoPlaySet && GameLogic_Miss != nullptr)
+        {
+            bAutoPlaySet = true;
+            EnableHook(GameLogic_Miss);
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Enabled");
+        }
+        else if (!bAutoPlay && bAutoPlaySet && GameLogic_Miss != nullptr)
+        {
+            bAutoPlaySet = false;
+            if (!bAllPerfectMode) DisableHook(GameLogic_Miss);
+            Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Auto Play Disabled");
+        }
 
         if (bInfiniteGauge && !bInfiniteGaugeSet) { bInfiniteGaugeSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Enabled"); }
         else if (!bInfiniteGauge && bInfiniteGaugeSet) { bInfiniteGaugeSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Infinite Gauge Disabled"); }
@@ -273,7 +267,7 @@ public:
             bAllPerfectHookSet = false;
             if (GameLogic_Good != nullptr) DisableHook(GameLogic_Good);
             if (GameLogic_Bad != nullptr) DisableHook(GameLogic_Bad);
-            if (!bNoMiss && GameLogic_Miss != nullptr) DisableHook(GameLogic_Miss);
+            if (!bAutoPlay && GameLogic_Miss != nullptr) DisableHook(GameLogic_Miss);
             Utils::LogDebug(Utils::GetLocation(CurrentLoc), "All Perfect Disabled");
         }
 
@@ -282,9 +276,6 @@ public:
 
         if (bSkipAffinityAnim && !bSkipAffinityAnimSet) { bSkipAffinityAnimSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Enabled"); }
         else if (!bSkipAffinityAnim && bSkipAffinityAnimSet) { bSkipAffinityAnimSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Affinity Animation Disabled"); }
-
-        if (bSkipResult && !bSkipResultSet) { bSkipResultSet = true; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Enabled"); }
-        else if (!bSkipResult && bSkipResultSet) { bSkipResultSet = false; Utils::LogDebug(Utils::GetLocation(CurrentLoc), "Skip Result Disabled"); }
 
         if (bForceFullCombo && pOnePlaySaveHolderInstance != nullptr)
         {
@@ -311,16 +302,11 @@ public:
             }
         }
 
-        if (pOnePlaySaveHolderInstance != nullptr)
+        // Skip affinity animation by setting LatestAddCharacterAffinityPoint to 0
+        if (bSkipAffinityAnim && pOnePlaySaveHolderInstance != nullptr)
         {
-            bool* pSkip = reinterpret_cast<bool*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::DebugForceResultSkip);
-            if (*pSkip != bSkipResult) *pSkip = bSkipResult;
-
-            if (bSkipAffinityAnim)
-            {
-                int* pAffinityPoint = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestAddCharacterAffinityPoint);
-                if (*pAffinityPoint > 0) *pAffinityPoint = 0;
-            }
+            int* pAffinityPoint = reinterpret_cast<int*>((uintptr_t)pOnePlaySaveHolderInstance + OnePlaySaveHolderOffsets::LatestAddCharacterAffinityPoint);
+            if (*pAffinityPoint > 0) *pAffinityPoint = 0;
         }
     }
 };
